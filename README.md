@@ -2,71 +2,39 @@
 
 ## Overview
 
-SkyJet AI is a hypothetical AI-powered airline assistant designed to help customers interact with airline services through a conversational interface. The system uses an LLM and a Retrieval-Augmented Generation (RAG) pipeline and integrates with backend services responsible for authentication, authorization and booking operations. This case study demonstrates how an AI-powered product can be analyzed from a security perspective during the design and development lifecycle.
+SkyJet AI is a hypothetical AI-powered airline assistant designed to help customers interact with airline services through a conversational interface. The system uses an LLM and a Retrieval-Augmented Generation (RAG) pipeline and integrates with backend services responsible for authentication, authorization and booking operations.
+
+This case study analyzes the application from a security perspective: it models the threats, tests the highest-risk ones against a running test environment and records controls and findings.
 
 > **Scope:** This is a security-focused case study. The architecture and scenarios are designed for educational and portfolio purposes.
 
+## Summary of Results
 
-## Objectives
+The threat model identifies 11 threats. The table shows where each one stands.
 
-The goal of this case study is to:
+| ID | Threat | Status |
+|---|---|---|
+| T-01 | Prompt Injection / Goal Hijacking | Tested with Garak: 25 of 64 prompts flagged as potential hits (39.1% automated hit rate); manual validation pending |
+| T-02 | Session Abuse | Tested: session identifier works as a bearer credential; booking authorization blocked cross-user access |
+| T-03 | Retrieval Manipulation | Planned |
+| T-04 | RAG / Knowledge Base Poisoning | Planned |
+| T-05 | Unsafe Tool Invocation | Planned |
+| T-06 | IDOR / Broken Access Control | Tested: backend ownership check blocked access; model fabricated a record in one chat-driven case; more variations planned |
+| T-07 | Unauthorized Booking Modification | Planned |
+| T-08 | Prompt Leakage | Tested via the evaluation suite: leakage in 3 cases |
+| T-09 | Output Manipulation | Planned |
+| T-10 | Data Leakage | Planned |
+| T-11 | Ungrounded Output | Tested via the evaluation suite: 4 failing cases |
 
-- Analyze the security architecture of an AI-powered application
-- Identify AI-specific and application-level attack surfaces
-- Perform threat modeling using the system architecture and data flows
-- Assess potential security risks
-- Define appropriate security controls and mitigations
-- Connect identified threats with practical security testing
+See [threat-model.md](threat-model.md) for the full analysis, the risk register, the test evidence and the findings.
 
 ## System Architecture
 
-```mermaid
-flowchart TD
-    User[User]
-
-    subgraph Application["SkyJet AI Application"]
-        FastAPI[FastAPI Application]
-        Auth[Authentication Service]
-        Authorization[Authorization Service]
-        Chatbot[Chatbot Service]
-        LLM[LLM Service]
-        RAG[RAG Service]
-        Booking[Booking Service]
-    end
-
-    subgraph Data["Application Data"]
-        Users[(Users)]
-        Sessions[(Sessions)]
-        Bookings[(Bookings)]
-    end
-
-    subgraph Knowledge["Knowledge Base"]
-        Policies[(Airline Policies)]
-    end
-
-    User -->|Prompt / Request| FastAPI
-    FastAPI --> Auth
-    FastAPI --> Authorization
-
-    Auth --> Chatbot
-    Authorization --> Chatbot
-
-    Chatbot --> LLM
-    Chatbot --> RAG
-    Chatbot --> Booking
-
-    RAG --> Policies
-
-    Booking --> Users
-    Booking --> Sessions
-    Booking --> Bookings
-````
+<img width="2335" height="1864" alt="mermaid-diagram(1)" src="https://github.com/user-attachments/assets/fe689d61-11f9-49e1-897e-456e4c4ea0e7" />
 
 ## Threat Modeling Approach
 
-The threat modeling process follows the following workflow:
-
-```text
+```
 System Architecture
         ↓
 Data Flow Analysis
@@ -84,55 +52,38 @@ Risk Assessment
 Security Controls
         ↓
 Security Testing
+        ↓
+Findings
 ```
 
 The assessment considers both traditional application security risks and AI-specific threats.
 
-### Security References
+## Security References
 
-* OWASP Top 10 for LLM Applications
-* OWASP GenAI Security Project
-* MITRE ATLAS
-* STRIDE
-* NIST AI Risk Management Framework
+- OWASP Top 10 for LLM Applications
+- OWASP API Security Top 10
+- STRIDE
 
 ## Threat Categories
 
-The assessment focuses on threats including:
+- Prompt Injection (including jailbreak-style overrides and encoded payloads)
+- Session Abuse
+- Retrieval Manipulation and RAG Poisoning
+- Excessive Agency and Unsafe Tool Invocation
+- Broken Access Control / IDOR
+- Prompt Leakage
+- Output Manipulation
+- Data Leakage
+- Ungrounded Output
 
-* Prompt Injection
-* Jailbreaking
-* Data Leakage
-* Broken Access Control / IDOR
-* RAG Poisoning
-* Retrieval Manipulation
-* Excessive Agency
-* Encoding-based Evasion
-* Sensitive Information Exposure
-* Model-related Privacy Risks
+## Related Repositories
 
-The final threat list will be refined based on the actual system architecture and identified attack surfaces.
+- [automated-AI-red-teaming-lab](https://github.com/irembezci/automated-AI-red-teaming-lab): automated prompt injection testing with Garak against SkyJet AI
+- [skyjet-ai-eval-suite](https://github.com/irembezci/skyjet-ai-eval-suite): 50-case evaluation suite covering policy grounding, tool calling and adversarial cases
 
+## Repository Contents
 
-## Case Study Deliverables
-
-This case study will document:
-
-1. System Architecture
-2. Data Flow Diagram
-3. Trust Boundaries
-4. Assets
-5. Attack Surface
-6. Threat Model
-7. Risk Assessment
-8. Security Controls
-9. Security Testing
-10. Findings and Recommendations
-
-
-## Security Testing
-
-Identified threats will be mapped to practical security tests where applicable. The objective is not only to identify theoretical risks but to validate whether the identified security controls are effective against realistic attack scenarios.
+- [threat-model.md](threat-model.md): architecture, trust boundaries, assets, attack surface, threats, risk register, testing, controls and findings
 
 ## Disclaimer
 
